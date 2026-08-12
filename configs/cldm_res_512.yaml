@@ -1,0 +1,133 @@
+model:
+  target: cldm.cldm.CGBEV
+  params:
+    linear_start: 0.00085
+    linear_end: 0.0120
+    num_timesteps_cond: 1
+    log_every_t: 200
+    timesteps: 1000
+    first_stage_key: "bev_map_gt"     # diffusion input
+    control_key: "bev_feat"         # controlnet input
+    reference_key: "pred_map"
+    # reference_key: Null
+    image_size: [512, 512]
+    # channels: 4
+    # scale_factor: 0.9976   # 4 layer
+    scale_factor: 1.0568    # 6 layer
+    default_scale: True
+    only_mid_control: False
+    sd_locked: False
+    parameterization: "eps"
+    sampling_step: 1
+    use_lovasz_loss: False
+
+    control_stage_config:
+      target: cldm.cldm.ControlNet
+      params:
+        # use_checkpoint: True
+        img_resolution: 64    # latent space resolution
+        in_channels: 4        # latent space input channel, align with vae latent channel
+        bev_encoder_in: 64   # original bev_feat channel  (lss:64, bevformer:128, stp3:192)
+        bev_encoder_out: 6    # bev_enc_out channel
+        model_channels: 128   # align with unet_config.model_channels (unet input channel)
+        attn_resolutions: [ 32, 16 ]
+        num_blocks: 2
+        channel_mult: [ 1, 2, 3, 4 ]
+        channel_mult_emb: 4   # align with_config.channel_mult_emb
+        gt_image_size: 512
+        semantic_layers: 6
+
+        # ---- Encoder selection ----
+        # Priority: use_multiscale > use_bevfusion > BevEncode.
+        use_multiscale: true            # Dilated Convolution-based encoder
+        multiscale_hidden_dim: 64       # 32 is not enough
+        multiscale_dilations: [1, 6, 18]   # Dilation rates for the three branches.
+        use_bevfusion: false            # BEVFusion style encoder (need small batch_size)
+
+    unet_config:
+      target: cldm.cldm.ControlledUnetModel
+      params:
+        img_resolution: 64
+        img_channels: 4
+        # sigma_data: 1.0  # Expected standard deviation of the training data.
+        # model_type: 'DhariwalUNet'
+        model_channels: 128  # Base multiplier for the number of channels.
+        channel_mult: [ 1, 2, 3, 4 ]
+        channel_mult_emb: 4  # Multiplier for the dimensionality of the embedding vector.
+        num_blocks: 2  # Number of residual blocks per resolution.
+        attn_resolutions: [ 32, 16 ]  # List of resolutions with self-attention.
+        dropout: 0.1  # dropout.
+        label_dropout: 0
+        augment_dim: 0
+
+    first_stage_config:
+      target: ldm.models.autoencoder.AutoencoderKL
+      params:
+        embed_dim: 4
+        monitor: val/rec_loss
+        ddconfig:
+          #attn_type: "vanilla-xformers"
+          double_z: true
+          z_channels: 4
+          resolution: 192
+          in_channels: 6  # number of semantic layers
+          out_ch: 6       # number of semantic layers
+          ch: 64
+          ch_mult:
+          - 1
+          - 2
+          - 4
+          - 4
+          num_res_blocks: 2
+          attn_resolutions: []
+          dropout: 0.0
+          tanh_out: False
+        lossconfig:
+          target: torch.nn.Identity
+        kl_div_weight: 1e-6
+        rec_weight: [0.1, 2.0, 1.0, 10.0]   # not used
+        semantic_layers: ['drivable_area',
+                          'ped_crossing',
+                          'walkway',
+                          'stop_line',
+                          'carpark_area',
+                          'lane_divider',
+                          ]
+        vae_training_cfg:
+          data_config:
+            data_split_train: "train"
+            data_split_val: "mini_val"
+            resolution: 512
+            augment: True
+            num_workers: 1
+            batch_size: 8   # 4 -> 36GB
+          trainer_config:
+            lr: !!float 5e-5
+            min_lr: !!float 2e-6
+            gpu_num: 2
+            precision: 32
+            epochs: 10
+            logger_freq: 500
+            resume_path: Null
+            # resume_path: "./ckpts/vae_ch=64_resolu=512_epoch=10.ckpt"
+
+    data_config:
+      data_split_train: "train"
+      data_split_val: "val"
+      resolution: 512
+      augment: False
+      num_workers: 1
+      batch_size: 16   # 80G
+      model: "lss"  # "lss", "bevformer", "stp3", "bevfusion"
+
+    trainer_config:
+      lr: !!float 5e-5
+      min_lr: !!float 2e-6
+      gpu_num: 1
+      precision: 32
+      epochs: 100
+      logger_freq: 500
+      val_after_epoch: 0
+      ldm_init_path: ckpts/ldm_ch=128_res=512_6_layer_epoch=31.ckpt
+      # resume_path: "./ckpts/cldm_res=192_6_layer_enc_v2.ckpt"
+      resume_path: Null

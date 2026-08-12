@@ -1,0 +1,93 @@
+model:
+  target: ldm.diffusion.ddm_const.LatentDiffusion
+  params:
+    image_size: [192, 192]
+    first_stage_key: "bev_map_gt"
+    ckpt_path:
+    ignore_keys: []
+    only_model: False
+    sampling_timesteps: 10
+    loss_type: l2
+    start_dist: normal
+    perceptual_weight: 0
+    # scale_factor: 0.9976  # 4 layer
+    scale_factor: 1.0036  # 6 layer
+    eps: !!float 1e-4
+    sigma_max: 1
+    sigma_min: 0.01
+    ldm: True
+    weighting_loss: True
+    use_l1: True
+    use_augment: False
+    sampling_step: 10
+
+    first_stage_config:
+      target: ldm.models.autoencoder.AutoencoderKL
+      params:
+        embed_dim: 4
+        monitor: val/rec_loss
+        ddconfig:
+          #attn_type: "vanilla-xformers"
+          double_z: true
+          z_channels: 4
+          resolution: 192
+          in_channels: 6  # 4 * 64 of stp3 output channels
+          out_ch: 6       # 4 * 64 of stp3 output channels
+          ch: 64
+          ch_mult:
+          - 1
+          - 2
+          - 4
+          - 4
+          num_res_blocks: 2
+          attn_resolutions: []
+          dropout: 0.0
+          tanh_out: True
+        lossconfig:
+          target: torch.nn.Identity
+        kl_div_weight: 2e-6
+        rec_weight: [0.1, 2.0, 1.0, 10.0]   # not used
+        semantic_layers: ['drivable_area',
+                  'ped_crossing',
+                  'walkway',
+                  'stop_line',
+                  'carpark_area',
+                  'lane_divider',
+                  ]
+      # ckpt_path: "./ckpts/vae_ch=64_resolu=192_epoch=16.ckpt"
+      ckpt_path: "./ckpts/vae_ch=64_resolu=192_6_layer_epoch=12.ckpt"
+    
+    unet_config:
+      target: ldm.modules.diffusionmodules.adm_unet.EDMPrecond
+      params:
+        img_resolution: 64
+        img_channels: 4
+        # sigma_data: 1.0  # Expected standard deviation of the training data.
+        model_type: 'DhariwalUNet'
+        model_channels: 128  # Base multiplier for the number of channels.
+        channel_mult: [ 1, 2, 3, 4 ]
+        channel_mult_emb: 4  # Multiplier for the dimensionality of the embedding vector.
+        num_blocks: 2  # Number of residual blocks per resolution.
+        attn_resolutions: [ 32, 16 ]  # List of resolutions with self-attention.
+        dropout: 0.05  # dropout (down from 0.1: train loss had plateaued, signs of mild under-fit, see analysis G/I).
+        label_dropout: 0
+        augment_dim: 0
+
+    data_config:
+      data_split_train: "train"
+      data_split_val: "val"
+      resolution: 192
+      augment: True
+      num_workers: 1
+      batch_size: 128   # 32-> 39GB
+
+
+    trainer_config:
+      lr: !!float 2e-4
+      min_lr: !!float 5e-6
+      gpu_num: 1
+      precision: 32
+      epochs: 120
+      logger_freq: 1000
+      val_after_epoch: 0
+      resume_path: Null    # set None to train from scratch
