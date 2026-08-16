@@ -1,5 +1,6 @@
 # CG-BEV: Conditional Generation of Bird's-Eye-View Segmentation Using BEV-optimised Diffusion
 
+![CG-BEV demonstration](assets/demo.gif)
 CG-BEV is a conditional generative framework for refining bird's-eye-view
 (BEV) semantic segmentation from perception features and coarse predictions.
 This repository contains the official training, evaluation, data preparation,
@@ -32,7 +33,7 @@ pip install -r requirements.txt
 ```
 Run the installation commands inside the `cgbev` environment.
 
-## Data preparation
+## Data Preparation
 
 This repository requires the **original nuScenes dataset** and three types of
 BEV segmentation data: 
