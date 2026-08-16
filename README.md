@@ -1,9 +1,10 @@
-# CG-BEV: Conditional Generative Bird's-Eye-View
+# CG-BEV: Conditional Generation of Bird's-Eye-View Segmentation Using BEV-optimised Diffusion
 
 CG-BEV is a conditional generative framework for refining bird's-eye-view
 (BEV) semantic segmentation from perception features and coarse predictions.
 This repository contains the official training, evaluation, data preparation,
 and benchmarking code.
+![Overview](./assets/structure.png)
 
 ## Overview
 
@@ -19,63 +20,54 @@ The unified entry points support VAE, LDM, CG-BEV, and optional end-to-end
 training or evaluation. The CLI keeps `cldm` as the task identifier for the
 conditional latent diffusion stage.
 
-## Repository layout
 
-```text
-CG-BEV/
-├── train.py                         # Unified training entry point
-├── test.py                          # Unified evaluation entry point
-├── nuScenesSegDataset.py            # nuScenes BEV segmentation dataset
-├── configs/                         # Model, data, and training configurations
-├── cldm/                            # CG-BEV conditional model
-│   ├── cldm.py                      # Main CG-BEV implementation
-│   ├── cgbev_stp3_2layer.py         # ST-P3-specific CG-BEV variant
-│   ├── bevencoder.py                # Conditional BEV encoders
-│   ├── bevfusion_seghead.py         # BEVFusion-style encoder components
-│   ├── e2e_lss.py                   # Optional LSS end-to-end wrapper
-│   └── e2e_stp3.py                  # Optional ST-P3 end-to-end wrapper
-├── ldm/
-│   ├── models/autoencoder.py        # VAE implementation
-│   ├── models/diffusion/            # Diffusion samplers
-│   ├── modules/                     # Neural network building blocks
-│   └── diffusion/                   # Latent diffusion implementation
-├── tools/                            # Data generation and evaluation utilities
-├── baseline_speed_benchmark/         # Isolated baseline speed benchmarks
-├── data/nuscenes/                    # nuScenes and generated BEV data
-├── ckpts/                            # Downloaded or trained checkpoints
-├── logs/                             # Training and evaluation outputs
-├── lss/                              # Optional external LSS source tree
-└── stp3/                             # Optional external ST-P3 source tree
-```
+## Environment Setup
 
-The `lss/` and `stp3/` directories are optional external dependencies and are
-not distributed with this repository. They are only required by the matching
-end-to-end wrappers and feature extraction scripts.
-
-## Installation
+Our code has been tested and runs successfully with Python 3.8 and PyTorch 1.12. Older versions may also work, but have not been tested. We recommend the following newer environment setup:
 
 ```bash
 conda create -n cgbev python=3.12 -y
 pip install torch==2.7.1 torchvision==0.22.1 --index-url https://download.pytorch.org/whl/cu128
 pip install -r requirements.txt
 ```
-
 Run the installation commands inside the `cgbev` environment.
 
 ## Data preparation
 
-Download nuScenes and arrange the raw data and generated inputs as follows:
+This repository requires the **original nuScenes dataset** and three types of
+BEV segmentation data: 
+- BEV semantic map ground truth (at 192 × 192 and 512 × 512 resolution)
+- BEV features inferred by the baseline model
+- BEV semantic map prediction inferred by the baseline model.
+
+1. Download nuScenes from the [official download page](https://www.nuscenes.org/nuscenes#download). Only the **Camera blobs** are required; download and extract them under `data/nuscenes/`.
+2. Prepare BEV segmentation map ground truth at both resolutions. You can generate it with `tools/generate_bev_gt.py` (see below) or download our pre-generated packages.
+3. Download the pre-inferenced BEV features and segmentation prediction. To use other baselines, generate its features and predictions yourself.
+
+| Data | Description | Download |
+| --- | --- | --- |
+| BEV seg map GT (192 × 192) | Pre-generated semantic-map ground truth | TBA |
+| BEV seg map GT (512 × 512) | Pre-generated semantic-map ground truth | TBA |
+| LSS package | Pre-generated BEV features and prediction maps | TBA |
+| BEVFusion package | Pre-generated BEV features and prediction maps | TBA |
+
+To generate semantic ground-truth masks yourself, run:
+
+```bash
+python tools/generate_bev_gt.py \
+  --ds-version v1.0-trainval \
+  --data-split train \
+  --resolution 192
+```
+
+Arrange the raw nuScenes and prepared/generated data as follows:
 
 ```text
 data/nuscenes/
 ├── samples/
-├── sweeps/
 ├── maps/
 ├── can_bus/
 ├── v1.0-trainval/
-├── v1.0-test/
-├── nuscenes_infos_train.pkl
-├── nuscenes_infos_val.pkl
 ├── bev_seg_gt_mask_192/
 │   ├── train/
 │   └── val/
@@ -92,31 +84,21 @@ data/nuscenes/
 └── prompt_<baseline>_val.json
 ```
 
-`<baseline>` can be `lss`, `bevformer`, `stp3`, `bevfusion`, or `vggt`.
-Generate semantic ground-truth masks with:
+For the provided packages, `<baseline>` is either `lss` or `bevfusion`.
 
-```bash
-python tools/generate_bev_gt.py \
-  --ds-version v1.0-trainval \
-  --data-split train \
-  --resolution 192
-```
-
-Feature and coarse-prediction files must use the filenames recorded in the
-corresponding `prompt_<baseline>_<split>.json` file.
 
 ## Pretrained models
 
 The download links are placeholders and will be updated with the public model
 release.
 
-| Model | Output resolution | Download |
-| --- | ---: | --- |
-| VAE | — | TBA |
-| LDM | 192 × 192 | TBA |
-| CG-BEV | 192 × 192 | TBA |
-| LDM | 512 × 512 | TBA |
-| CG-BEV | 512 × 512 | TBA |
+| Model | Output resolution | mIoU | Download |
+| --- | ---: | --- | --- |
+| VAE | — | --- | TBA |
+| LDM | 192 × 192 | --- | TBA |
+| CG-BEV | 192 × 192 | --- | TBA |
+| LDM | 512 × 512 | --- | TBA |
+| CG-BEV | 512 × 512 | --- | TBA |
 
 Place downloaded weights in `ckpts/`. Update the checkpoint paths in the YAML
 configuration or pass them through the command line.
