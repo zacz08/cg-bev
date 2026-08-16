@@ -1,11 +1,10 @@
 # CG-BEV: Conditional Generation of Bird's-Eye-View Segmentation Using BEV-optimised Diffusion
 
-![CG-BEV demonstration](assets/demo.gif)
 CG-BEV is a conditional generative framework for refining bird's-eye-view
 (BEV) semantic segmentation from perception features and coarse predictions.
 This repository contains the official training, evaluation, data preparation,
 and benchmarking code.
-![Overview](./assets/structure.png)
+![CG-BEV demonstration](assets/demo.gif)
 
 ## Overview
 
@@ -20,6 +19,7 @@ CG-BEV uses a three-stage training pipeline:
 The unified entry points support VAE, LDM, CG-BEV, and optional end-to-end
 training or evaluation. The CLI keeps `cldm` as the task identifier for the
 conditional latent diffusion stage.
+![Overview](./assets/structure.png)
 
 
 ## Environment Setup
