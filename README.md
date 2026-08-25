@@ -16,10 +16,8 @@ CG-BEV uses a three-stage training pipeline:
 3. CG-BEV conditions the generative prior on BEV features and coarse semantic
    predictions from a perception backbone.
 
-The unified entry points support VAE, LDM, CG-BEV, and optional end-to-end
-training or evaluation. The CLI keeps `cldm` as the task identifier for the
-conditional latent diffusion stage.
-![Overview](./assets/structure.png)
+## Pipeline Structure
+![Pipeline Structure](./assets/structure.png)
 
 
 ## Environment Setup
@@ -148,6 +146,13 @@ FLOPs. Evaluation outputs are stored under `logs/`.
 ## Citation
 
 The citation entry will be added with the camera-ready paper release.
+
+## Acknowledgement
+This project is built upon the following open-source projects: 
+* [ControlNet](https://github.com/lllyasviel/ControlNet)
+* [ADM](https://github.com/GuHuangAI/ADM-Public)
+
+We would like to express our gratitude to all the authors for their contributions.
 
 ## License
 
