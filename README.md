@@ -44,11 +44,10 @@ BEV segmentation data:
 3. Download the pre-inferenced BEV features and segmentation prediction. To use other baselines, generate its features and predictions yourself.
 
 | Data | Description | Download |
-| --- | --- | --- |
-| BEV seg map GT (192 × 192) | Pre-generated semantic-map ground truth | TBA |
-| BEV seg map GT (512 × 512) | Pre-generated semantic-map ground truth | TBA |
-| LSS package | Pre-generated BEV features and prediction maps | TBA |
-| BEVFusion package | Pre-generated BEV features and prediction maps | TBA |
+| --- | --- | :---: |
+| BEV seg map GT | Pre-generated semantic-map ground truth | [Link](https://huggingface.co/zacz08/CG-BEV/resolve/main/bev_seg_gt_mask.zip) |
+| LSS package | Cashed BEV features and prediction maps | TBA |
+| BEVFusion package | Cashed BEV features and prediction maps | TBA |
 
 To generate semantic ground-truth masks yourself, run:
 
@@ -91,13 +90,15 @@ For the provided packages, `<baseline>` is either `lss` or `bevfusion`.
 The download links are placeholders and will be updated with the public model
 release.
 
-| Model | Output resolution | mIoU | Download |
-| --- | ---: | --- | --- |
-| VAE | — | --- | TBA |
-| LDM | 192 × 192 | --- | TBA |
-| CG-BEV | 192 × 192 | --- | TBA |
-| LDM | 512 × 512 | --- | TBA |
-| CG-BEV | 512 × 512 | --- | TBA |
+| Model | Output resolution | mIoU(%) | Download |
+| :---: | :---: | :---: | :---:|
+| VAE | — | 98.32 | [Link](https://huggingface.co/zacz08/CG-BEV/resolve/main/vae_c64_6cls.ckpt) |
+| LDM | 192 × 192 | — | [Link](https://huggingface.co/zacz08/CG-BEV/resolve/main/ldm_c128_res192_6cls.ckpt) |
+| LDM | 512 × 512 | — | [Link](https://huggingface.co/zacz08/CG-BEV/resolve/main/ldm_c128_res512_6cls.ckpt) |
+| CG-BEV (LSS)| 192 × 192 | 38.33 | [Link](https://huggingface.co/zacz08/CG-BEV/resolve/main/cgbev_lss_192_miou_38_33.ckpt) |
+| CG-BEV (LSS)| 512 × 512 | 35.23 | [Link](https://huggingface.co/zacz08/CG-BEV/resolve/main/cgbev_lss_512_miou_35_23.ckpt) |
+| CG-BEV (BEVFusion)| 192 × 192 | 58.66 | [Link](https://huggingface.co/zacz08/CG-BEV/resolve/main/cgbev_bevfusion_192_miou_58_66.ckpt) |
+| CG-BEV (BEVFusion)| 512 × 512 | 56.07 | [Link](https://huggingface.co/zacz08/CG-BEV/resolve/main/cgbev_bevfusion_512_miou_56_07.ckpt) |
 
 Place downloaded weights in `ckpts/`. Update the checkpoint paths in the YAML
 configuration or pass them through the command line.
