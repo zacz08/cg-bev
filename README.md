@@ -49,7 +49,7 @@ BEV segmentation data:
 | --- | --- | :---: |
 | BEV seg map GT | Pre-generated semantic-map ground truth | [Link](https://huggingface.co/zacz08/CG-BEV/resolve/main/bev_seg_gt_mask.zip) |
 | LSS package | Cashed BEV features and prediction maps | TBA |
-| BEVFusion package | Cashed BEV features and prediction maps | TBA |
+| BEVFusion package | Cashed BEV features and prediction maps | [Link](https://huggingface.co/zacz08/CG-BEV/resolve/main/inference_cache_bevfusion.zip) |
 
 To generate semantic ground-truth masks yourself, run:
 
