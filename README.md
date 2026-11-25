@@ -1,5 +1,7 @@
 # CG-BEV: Conditional Generation of Bird's-Eye-View Segmentation Using BEV-optimised Diffusion
 
+**[[Paper Link (BMVC 2026)](https://www.bmva-archive.org.uk/bmvc/2026/assets/papers/00353.pdf)]**
+
 CG-BEV is a conditional generative framework for refining bird's-eye-view
 (BEV) semantic segmentation from perception features and coarse predictions.
 This repository contains the official training, evaluation, data preparation,
